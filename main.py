@@ -1,12 +1,11 @@
-import re
-import json
+import re, yaml, json, time, random, requests
 from pathlib import Path
 from os import path
-import requests
 from bs4 import BeautifulSoup
-import time
-import random
 
+
+CONFIG_PATH = 'config.yaml'
+CONFIG = None
 
 BASE_ADDRESS = "https://www.binance.com"
 URL = "/en/support/announcement/c-48?navId=48"
@@ -42,18 +41,29 @@ def load_json():
             file.write('{}')
 
 
+def get_config():
+    try:
+        with open(CONFIG_PATH, 'r') as file:
+            config = yaml.safe_load(file)
+        return config
+    except FileNotFoundError:
+        print('Config file does not exist.')
+        exit()
+
+
 def extract_state(doc):
     soup = BeautifulSoup(doc.content, 'html.parser')
 
     listings = soup.findAll('a', text=re.compile("Binance Will List"))
 
-    urls = list()
-    texts = list()
+    state = dict()
     for listing in listings:
-        urls.append(listing['href'])
-        texts.append(listing.contents[0])
+        state[listing['href']] = {
+            'text': listing.contents[0],
+            'coin_name': re.compile('\((.*)\)').search(listing.text).group(1),
+        }
 
-    return dict(zip(urls, texts))
+    return state
 
 
 def diff(a, b):
@@ -78,10 +88,13 @@ def run():
 
 
 def main():
-    print('starting client ... \n')
+    print('starting client ...')
+
+    print('load config ...')
+    CONFIG = get_config()
 
     # init state
-    print('setting initial list ...\n')
+    print('setting initial list ...')
     load_json()
 
     # run the loop
