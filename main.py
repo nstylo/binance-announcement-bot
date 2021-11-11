@@ -9,30 +9,36 @@ from settings import (_get_config,
                       )
 
 
-# TODO: load this from a file, or create one if none exists
-PREV_LISTINGS = dict()
-# TODO: store this from a file, or create one if none exists
 CURR_LISTINGS = dict()
+NEW_LISTINGS = dict()
 
 
-def store_json(state):
+def _store_json(state):
+    """
+    serialize state and save to json file.
+    """
     Path(STATE_PATH).mkdir(parents=True, exist_ok=True)
     with open(FULL_STATE_PATH + '.json', 'w') as file:
         json.dump(state, file, indent=4)
 
 
 def load_json():
-    global PREV_LISTINGS
+    """
+    This function loads the state from file into memory.
+    If file does not exist, this function will create a
+    new one.
+    """
+    global CURR_LISTINGS
+
     postfixed_full_path = FULL_STATE_PATH + '.json'
     try:
         with open(postfixed_full_path, 'r') as file:
-            PREV_LISTINGS = json.load(file)
+            CURR_LISTINGS = json.load(file)
     except FileNotFoundError:
         print(f"state file '{postfixed_full_path}' not found. Creating new.")
         Path(STATE_PATH).mkdir(parents=True, exist_ok=True)
         with open(postfixed_full_path, 'w') as file:
             file.write('{}')
-
 
 
 def _extract_state(doc):
@@ -67,11 +73,11 @@ def compare_and_update_state():
     Compare current with new state and updates
     with new state if they differ.
     """
-    global PREV_LISTINGS
+    global CURR_LISTINGS
 
     doc = requests.get(BASE_ADDRESS + URL)
     new_state = _extract_state(doc)
-    diff = _diff_state(new_state, PREV_LISTINGS)
+    diff = _diff_state(new_state, CURR_LISTINGS)
 
     if len(diff) == 0:
         pass
@@ -79,8 +85,8 @@ def compare_and_update_state():
         print('Change detected:')
         # TODO: write to a log file
         print(diff)
-        PREV_LISTINGS = new_state
-        store_json(new_state)
+        CURR_LISTINGS = new_state
+        _store_json(new_state)
 
 
 def main():
