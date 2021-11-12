@@ -1,5 +1,5 @@
 from os import path
-import yaml
+import yaml, logging
 
 
 BASE_ADDRESS = "https://www.binance.com"
@@ -19,21 +19,48 @@ STATE_FILE = 'state'
 # no file postfix
 FULL_STATE_PATH = path.abspath(path.join(STATE_PATH, STATE_FILE))
 
-
 # cached config
 CONFIG = dict()
 
-def _load_config():
-    global CONFIG
-    try:
-        with open(CONFIG_PATH, 'r') as file:
-            config = yaml.safe_load(file)
-        CONFIG = config
-        print(CONFIG)
-    except FileNotFoundError:
-        # TODO: proper error print
-        print('Config file does not exist.')
-        exit()
 
-print('load config into memory ... \n')
-_load_config()
+# setup logging
+class CustomFormatter(logging.Formatter):
+    grey = "\x1b[38;21m"
+    yellow = "\x1b[33;21m"
+    red = "\x1b[31;21m"
+    bold_red = "\x1b[31;1m"
+    reset = "\x1b[0m"
+    _format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s (%(filename)s:%(lineno)d)"
+
+    FORMATS = {
+        logging.DEBUG: grey + _format + reset,
+        logging.INFO: grey + _format + reset,
+        logging.WARNING: yellow + _format + reset,
+        logging.ERROR: red + _format + reset,
+        logging.CRITICAL: bold_red + _format + reset
+    }
+
+    def format(self, record):
+        log_fmt = self.FORMATS.get(record.levelno)
+        formatter = logging.Formatter(log_fmt)
+        return formatter.format(record)
+
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
+sh = logging.StreamHandler()
+sh.setLevel(logging.INFO)
+
+sh.setFormatter(CustomFormatter())
+logger.addHandler(sh)
+
+
+logging.info('load config into memory ...')
+try:
+    with open(CONFIG_PATH, 'r') as file:
+        config = yaml.safe_load(file)
+    CONFIG = config
+except FileNotFoundError:
+    logging.critical('Config file does not exist.')
+    exit()
