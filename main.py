@@ -1,8 +1,7 @@
 import re, json, time, random, requests
 from pathlib import Path
 from bs4 import BeautifulSoup
-from settings import (_get_config,
-                      STATE_PATH,
+from settings import ( STATE_PATH,
                       FULL_STATE_PATH,
                       BASE_ADDRESS,
                       URL,
@@ -82,18 +81,17 @@ def compare_and_update_state():
     if len(diff) == 0:
         pass
     else:
-        print('Change detected:')
-        # TODO: write to a log file
-        print(diff)
         CURR_LISTINGS = new_state
         _store_json(new_state)
+        return diff
 
 
 def main():
-    print('starting client ...')
+    # Run script level functions
+    import settings
+    import coininfo
 
-    print('load config ...')
-    _get_config()
+    print('starting client ...')
 
     # init state
     print('setting initial list ...')
@@ -102,7 +100,9 @@ def main():
     # run the loop
     print('listening ...')
     while True:
-        compare_and_update_state()
+        if diff := compare_and_update_state():
+            print('Change detected:')
+            print(diff)
         time.sleep(random.uniform(3, 5))
 
 
