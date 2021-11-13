@@ -8,6 +8,8 @@ import re, json, time, random, requests, logging
 from pathlib import Path
 from bs4 import BeautifulSoup
 
+logger = logging.getLogger(__name__)
+
 
 CURR_LISTINGS = dict()
 NEW_LISTINGS = dict()
@@ -35,7 +37,7 @@ def load_json():
         with open(postfixed_full_path, 'r') as file:
             CURR_LISTINGS = json.load(file)
     except FileNotFoundError:
-        logging.warning(f"state file '{postfixed_full_path}' not found. Creating new.")
+        logger.warning(f"state file '{postfixed_full_path}' not found. Creating new.")
         Path(STATE_PATH).mkdir(parents=True, exist_ok=True)
         with open(postfixed_full_path, 'w') as file:
             file.write('{}')
@@ -88,28 +90,28 @@ def compare_and_update_state():
 
 
 def main():
-    # Run script level functions
+    # Run script level code
     import settings
     import coininfo
 
-    logging.info('starting client ...')
+    logger.info('starting client ...')
 
     # init state
-    logging.info('setting initial list ...')
+    logger.info('setting initial list ...')
     load_json()
 
     # run the loop
-    logging.info('listening ...')
+    logger.info('listening ...')
     while True:
         if new_coins := compare_and_update_state():
-            logging.info('Change detected:')
+            logger.info('Change detected:')
 
             # dispatch new thread which will make the trade
             for new_coin_uri in new_coins:
                 try:
-                    logging.info(get_coin_info(new_coin_uri))
+                    logger.info(get_coin_info(new_coin_uri))
                 except Exception as e:
-                    logging.warning(e)
+                    logger.warning(e)
 
         time.sleep(random.uniform(3, 5))
 

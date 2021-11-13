@@ -46,21 +46,24 @@ class CustomFormatter(logging.Formatter):
         return formatter.format(record)
 
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 sh = logging.StreamHandler()
 sh.setLevel(logging.INFO)
 
 sh.setFormatter(CustomFormatter())
-logger.addHandler(sh)
+
+logging.basicConfig(level=logging.INFO,
+                    handlers=(sh,)
+                    )
 
 
-logging.info('load config into memory ...')
+logger.info('load config into memory ...')
 try:
     with open(CONFIG_PATH, 'r') as file:
         config = yaml.safe_load(file)
     CONFIG = config
 except FileNotFoundError:
-    logging.critical('Config file does not exist.')
+    logger.critical('Config file does not exist.')
     exit()
