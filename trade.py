@@ -30,66 +30,21 @@ UNISWAP_ROUTER_ADDR = Web3.toChecksumAddress('0xE592427A0AEce92De3Edee1F18E0157C
 
 w3 = Web3(Web3.HTTPProvider(WEB3_HTTP_PROVIDER))
 if not w3.isConnected():
-    logger.critical(f"Could not connect to {WEB3_HTTP_PROVIDER}.")
+    logger.critical(f"could not connect to {WEB3_HTTP_PROVIDER}.")
     exit(1)
 else:
-    logger.info(f"Successfully conntected to {WEB3_HTTP_PROVIDER}.")
+    logger.info(f"successfully conntected to {WEB3_HTTP_PROVIDER}.")
 
 
+def swap(coin_out, amount):
+    logger.info(f"swapping {Web3.fromWei(amount, 'ether')} ETH for {coin_out[0]}.")
 
-# TODO: error handling
-# TODO: asyncronousity (after sending tx, return when and if tx was successful/failing)
-def dev_eth_to_weth(eth_amount):
-    with open('./abi/weth_abi.json') as abi:
-        weth_contract = w3.eth.contract(address=WETH_ADDR, abi=json.load(abi))
-
-    params = {
-        'from': WALLET_ADDR,
-        'value': Web3.toWei(eth_amount, 'ether')
-    }
-
-    tx = weth_contract.functions.deposit().buildTransaction(params)
-
-    nonce = w3.eth.get_transaction_count(WALLET_ADDR)
-    tx.update({ 'nonce': nonce })
-
-    signed_tx = w3.eth.account.sign_transaction(
-        tx,
-        PRIVATE_KEY
-    )
-    w3.eth.send_raw_transaction(signed_tx.rawTransaction)
-
-
-# TODO: error handling
-# TODO: asyncronousity (after sending tx, return when and if tx was successful/failing)
-def dev_weth_to_eth():
-    with open('./abi/weth_abi.json') as abi:
-        weth_contract = w3.eth.contract(address=WETH_ADDR, abi=json.load(abi))
-
-    weth_balance = weth_contract.functions.balanceOf(WALLET_ADDR).call()
-
-    tx = weth_contract.functions.withdraw(
-        wad=weth_balance,
-    ).buildTransaction({ 'from': WALLET_ADDR })
-
-    nonce = w3.eth.get_transaction_count(WALLET_ADDR)
-    tx.update({ 'nonce': nonce })
-
-    signed_tx = w3.eth.account.sign_transaction(
-        tx,
-        PRIVATE_KEY
-    )
-
-    w3.eth.send_raw_transaction(signed_tx.rawTransaction)
-
-
-def swap(coin_in_addr, coin_out_addr, amount):
     with open('./abi/uniswap_router_abi.json') as abi:
         router_instance = w3.eth.contract(address=UNISWAP_ROUTER_ADDR, abi=json.load(abi))
 
     params = {
-        'tokenIn': coin_in_addr,
-        'tokenOut': coin_out_addr,
+        'tokenIn': WETH_ADDR,
+        'tokenOut': coin_out[1],
         'fee': 3000,
         'recipient': WALLET_ADDR,
         'deadline': int((datetime.now() + timedelta(seconds=20)).timestamp()),
@@ -118,15 +73,16 @@ def swap(coin_in_addr, coin_out_addr, amount):
     )
     tx_hash = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
     receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
-    logger.info(receipt['status'])
+
+    if receipt['status'] == 1:
+        logger.info("transaction successful.")
 
 
-def invoke_trade(coin_info):
-    if coin_info[0] == 'ethereum':
+def invoke_trade(coin_symbol, coin_addr, chain):
+    if chain == 'ethereum':
         logger.info('trading ...')
-        swap(WETH_ADDR, Web3.toChecksumAddress(coin_info[1]), Web3.toWei(10, 'ether'))
-
-
-if not CONFIG['PROD']:
-    dev_eth_to_weth(5)
+        swap(
+            (coin_symbol, Web3.toChecksumAddress(coin_addr)),
+            Web3.toWei(10, 'ether')
+        )
 

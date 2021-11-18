@@ -55,5 +55,5 @@ try:
         config = yaml.safe_load(file)
     CONFIG = config
 except FileNotFoundError:
-    logger.critical('Config file does not exist.')
+    logger.critical('config file does not exist.')
     exit(1)

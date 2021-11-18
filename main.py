@@ -10,6 +10,7 @@ from bs4 import BeautifulSoup
 logger = logging.getLogger(__name__)
 
 
+# global state
 CURR_LISTINGS = dict()
 NEW_LISTINGS = dict()
 
@@ -71,22 +72,22 @@ def main():
     # TODO: this is not DRY, see below
     logger.info('setting initial list ...')
     for coin_uri in compare_and_update_state():
-        coin_info = None
         try:
-            coin_info = get_coin_info(coin_uri)
-            # TODO: temp
-            logger.info(coin_info)
+            chain, coin_addr = get_coin_info(coin_uri)
         except Exception as e:
             logger.warning(e)
+            continue
 
-        if coin_info:
-            invoke_trade(coin_info)
+        coin_symbol = CURR_LISTINGS[coin_uri]['symbol']
+        coin_info = (coin_symbol, coin_addr, chain)
+        logger.info(coin_info)
+        invoke_trade(*coin_info)
 
     # run the loop
     logger.info('listening ...')
     while True:
         if new_coins := compare_and_update_state():
-            logger.info('Change detected:')
+            logger.info('change detected:')
 
             # TODO: dispatch new thread which will make the trade
             for new_coin_uri in new_coins:
