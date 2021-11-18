@@ -7,11 +7,8 @@ URL = "/en/support/announcement/c-48?navId=48"
 
 CONFIG_PATH = 'config.yaml'
 
-SELL_ADDRESS = "https://www.binance.com"
-SELL_URL = "/en/support/announcement/c-48?navId=48"
-
-COIN_INFO_ADDRESS = 'https://pro-api.coinmarketcap.com'
-COIN_INFO_URL = '/v1/cryptocurrency/map'
+#  SELL_ADDRESS = "https://www.binance.com"
+#  SELL_URL = "/en/support/announcement/c-48?navId=48"
 
 STATE_PATH = 'out/'
 STATE_FILE = 'state'
@@ -66,4 +63,4 @@ try:
     CONFIG = config
 except FileNotFoundError:
     logger.critical('Config file does not exist.')
-    exit()
+    exit(1)

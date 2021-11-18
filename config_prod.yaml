@@ -1,0 +1,5 @@
+PROD: true
+WALLET_ADDR: '<your-wallet-address>'
+WALLET_PRIVATE_KEY: '<your-wallet-private-key>'
+WEB3_HTTP_PROVIDER: 'https://mainnet.infura.io/v3/<your-api-key>'
+WETH_ADDR: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'

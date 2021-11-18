@@ -1,0 +1,5 @@
+PROD: false
+WALLET_ADDR: '<your-wallet-address>'
+WALLET_PRIVATE_KEY: '<your-wallet-private-key>'
+CHAIN_FORK_URL: 'https://mainnet.infura.io/v3/<your-api-key>'
+WEB3_HTTP_URL: 'http://127.0.0.1:8545'

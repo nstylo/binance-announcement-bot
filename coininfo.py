@@ -1,3 +1,4 @@
+from typing import Literal, Tuple
 from settings import BASE_ADDRESS
 from urllib.parse import urlparse
 from selenium import webdriver
@@ -11,7 +12,15 @@ options.add_argument('--disable-gpu')
 driver = webdriver.Chrome(chrome_options=options)
 
 
-def get_coin_info(uri):
+# TODO: right now this function is using selenium
+# which probably is rather slow. Perhaps there is a
+# better way, i.e. how to use bf4 on dynamically loaded content?
+def get_coin_info(uri) -> Tuple[Literal['ethereum', 'binance'], str]:
+    """
+    Takes the URI of a binance announcement and returns
+    a tuple containing the chain identifier and the token
+    address of the coin.
+    """
     driver.get(BASE_ADDRESS + uri)
     elem = driver.find_element_by_partial_link_text('Block Explorer')
     href = elem.get_attribute('href')
