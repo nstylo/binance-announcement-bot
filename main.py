@@ -1,4 +1,5 @@
 from coininfo import get_coin_info
+from trade import invoke_trade
 from settings import ( BASE_ADDRESS,
                       URL,
                       )
@@ -70,10 +71,16 @@ def main():
     # TODO: this is not DRY, see below
     logger.info('setting initial list ...')
     for coin_uri in compare_and_update_state():
+        coin_info = None
         try:
-            logger.info(get_coin_info(coin_uri))
+            coin_info = get_coin_info(coin_uri)
+            # TODO: temp
+            logger.info(coin_info)
         except Exception as e:
             logger.warning(e)
+
+        if coin_info:
+            invoke_trade(coin_info)
 
     # run the loop
     logger.info('listening ...')
