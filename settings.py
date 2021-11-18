@@ -1,4 +1,3 @@
-from os import path
 import yaml, logging
 
 
@@ -9,12 +8,6 @@ CONFIG_PATH = 'config.yaml'
 
 #  SELL_ADDRESS = "https://www.binance.com"
 #  SELL_URL = "/en/support/announcement/c-48?navId=48"
-
-STATE_PATH = 'out/'
-STATE_FILE = 'state'
-
-# no file postfix
-FULL_STATE_PATH = path.abspath(path.join(STATE_PATH, STATE_FILE))
 
 # cached config
 CONFIG = dict()

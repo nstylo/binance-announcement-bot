@@ -1,7 +1,5 @@
 from coininfo import get_coin_info
-from settings import ( STATE_PATH,
-                      FULL_STATE_PATH,
-                      BASE_ADDRESS,
+from settings import ( BASE_ADDRESS,
                       URL,
                       )
 import re, json, time, random, requests, logging
