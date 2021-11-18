@@ -1,0 +1,15 @@
+{
+  "name": "ganache",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "ganache-cli -a 1 --account_keys_path keys.json --fork $(grep 'CHAIN_FORK_URL' ../config.yaml | tail -n1 | cut -c 17-)"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ganache-cli": "^6.12.2"
+  }
+}
